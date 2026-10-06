@@ -1,17 +1,15 @@
 package com.hanqiu.blog.controller;
 
 import com.hanqiu.blog.domain.dtos.CreateTagsRequest;
-import com.hanqiu.blog.domain.dtos.TagResponse;
+import com.hanqiu.blog.domain.dtos.TagDto;
 import com.hanqiu.blog.domain.entities.Tag;
 import com.hanqiu.blog.mappers.TagMapper;
 import com.hanqiu.blog.services.TagService;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,17 +21,17 @@ public class TagController {
     private final TagMapper tagMapper;
 
     @GetMapping
-    public ResponseEntity<List<TagResponse>> getAllTags() {
+    public ResponseEntity<List<TagDto>> getAllTags() {
         List<Tag> tags = tagService.getTags();
-        List<TagResponse> tagResponses = tags.stream().map(tagMapper::toTagResponse).toList();
-        return ResponseEntity.ok(tagResponses);
+        List<TagDto> tagRespons = tags.stream().map(tagMapper::toTagResponse).toList();
+        return ResponseEntity.ok(tagRespons);
     }
 
     @PostMapping
-    public ResponseEntity<List<TagResponse>> createTags(@RequestBody CreateTagsRequest createTagsRequest) {
+    public ResponseEntity<List<TagDto>> createTags(@RequestBody CreateTagsRequest createTagsRequest) {
         List<Tag> savedTags = tagService.createTags(createTagsRequest.getNames());
-        List<TagResponse> createTagResponses = savedTags.stream().map(tagMapper::toTagResponse).toList();
-        return new ResponseEntity<>(createTagResponses, HttpStatus.CREATED);
+        List<TagDto> createTagRespons = savedTags.stream().map(tagMapper::toTagResponse).toList();
+        return new ResponseEntity<>(createTagRespons, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")

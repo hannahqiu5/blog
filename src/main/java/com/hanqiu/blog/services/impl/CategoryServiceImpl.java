@@ -3,6 +3,7 @@ package com.hanqiu.blog.services.impl;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.repositories.CategoryRepository;
 import com.hanqiu.blog.services.CategoryService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,8 +23,8 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findAllWithPostCount();
     }
 
-    @Override
     @Transactional
+    @Override
     public Category createCategory(Category category) {
         if (categoryRepository.existsByNameIgnoreCase(category.getName())) {
             throw new IllegalArgumentException("Category already exists with the name" + category.getName());
@@ -32,6 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.save(category);
     }
 
+    @Transactional
     @Override
     public void deleteCategory(UUID id) {
         Optional<Category> category = categoryRepository.findById(id);
@@ -41,5 +43,10 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
         categoryRepository.deleteById(id);
+    }
+
+    @Override
+    public Category getCategoryById(UUID id) {
+        return  categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category not found with id " + id));
     }
 }
