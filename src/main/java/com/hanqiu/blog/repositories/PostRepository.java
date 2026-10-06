@@ -4,6 +4,7 @@ import com.hanqiu.blog.domain.PostStatus;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.Tag;
+import com.hanqiu.blog.domain.entities.User;
 import com.hanqiu.blog.services.PostService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -21,4 +22,6 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     List<Post> findAllByStatusAndTagsContaining(PostStatus status, Tag tag);
 
     List<Post> findAllByStatus(PostStatus status);
+
+    List<Post> findAllByAuthorAndStatus(User user, PostStatus postStatus);
 }

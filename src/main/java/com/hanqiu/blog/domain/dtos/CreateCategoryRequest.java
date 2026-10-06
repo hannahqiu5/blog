@@ -18,7 +18,7 @@ public class CreateCategoryRequest {
     @Size(
             min = 2,
             max = 50,
-            message = "Category name mush between ${min} and ${max} characters!"
+            message = "Category name must be between {min} and {max} characters!"
     )
     @Pattern(
             regexp = "^[\\w\\s-]+$",

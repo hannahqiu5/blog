@@ -59,19 +59,37 @@ public class Post {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+
         Post post = (Post) o;
-        return Objects.equals(id, post.id) && Objects.equals(title, post.title) && Objects.equals(content, post.content) && Objects.equals(author, post.author) && Objects.equals(category, post.category) && Objects.equals(tags, post.tags) && status == post.status && Objects.equals(readingTime, post.readingTime) && Objects.equals(createdAt, post.createdAt) && Objects.equals(updatedAt, post.updatedAt);
+
+        return Objects.equals(id, post.id)
+                && Objects.equals(title, post.title)
+                && Objects.equals(content, post.content)
+                && status == post.status
+                && Objects.equals(readingTime, post.readingTime)
+                && Objects.equals(createdAt, post.createdAt)
+                && Objects.equals(updatedAt, post.updatedAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, title, content, author, category, tags, status, readingTime, createdAt, updatedAt);
+        return Objects.hash(
+                id,
+                title,
+                content,
+                status,
+                readingTime,
+                createdAt,
+                updatedAt
+        );
     }
-
     @PrePersist // method called when entity is created
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     @PreUpdate // called when entity is updated
