@@ -1,7 +1,6 @@
 package com.hanqiu.blog.controller;
 
 import com.hanqiu.blog.domain.CreatePostRequest;
-import com.hanqiu.blog.domain.PostStatus;
 import com.hanqiu.blog.domain.UpdatePostRequest;
 import com.hanqiu.blog.domain.dtos.CreatePostRequestDto;
 import com.hanqiu.blog.domain.dtos.PostDto;
@@ -13,14 +12,12 @@ import com.hanqiu.blog.services.PostService;
 import com.hanqiu.blog.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/v1/posts")
@@ -79,9 +76,9 @@ public class PostController {
         return ResponseEntity.ok(dto);
     }
 
-     @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable UUID id) {
         postService.deletePost(id);
         return ResponseEntity.noContent().build();
-     }
+    }
 }

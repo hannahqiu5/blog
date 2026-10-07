@@ -2,7 +2,6 @@ package com.hanqiu.blog.controller;
 
 import com.hanqiu.blog.domain.dtos.CategoryDto;
 import com.hanqiu.blog.domain.dtos.CreateCategoryRequest;
-import com.hanqiu.blog.domain.dtos.CreatePostRequestDto;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.mappers.CategoryMapper;
 import com.hanqiu.blog.services.CategoryService;
@@ -96,7 +95,12 @@ public class CategoryControllerTest {
                 )
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name").value("Test"))
-                .andExpect(jsonPath("$.postCount").value(0));;
+                .andExpect(jsonPath("$.postCount").value(0));
+
+
+        verify(categoryMapper).toEntity(request);
+        verify(categoryService).createCategory(category);
+        verify(categoryMapper).toDto(category);
     }
 
     @Test
@@ -107,10 +111,10 @@ public class CategoryControllerTest {
                         .build();
 
         mockMvc.perform(
-                post("/api/v1/categories")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidRequest))
-        )
+                        post("/api/v1/categories")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(invalidRequest))
+                )
                 .andExpect(status().isBadRequest());
     }
 

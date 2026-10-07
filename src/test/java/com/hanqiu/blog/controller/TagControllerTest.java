@@ -14,7 +14,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -79,9 +78,9 @@ public class TagControllerTest {
     }
 
     @Test
-    void createTagsRequest_shouldReturn201() throws Exception {
+    void createTags_shouldReturn201() throws Exception {
         CreateTagsRequest createTagsRequest = CreateTagsRequest.builder()
-                        .names(Set.of("Test One", "Test Two")).build();
+                .names(Set.of("Test One", "Test Two")).build();
         when(tagService.createTags(createTagsRequest.getNames()))
                 .thenReturn(List.of(tag1, tag2));
         when(tagMapper.toTagResponse(tag1))
@@ -89,8 +88,8 @@ public class TagControllerTest {
         when(tagMapper.toTagResponse(tag2))
                 .thenReturn(tagDto2);
 
-        mockMvc.perform(post("/api/v1/tags") .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createTagsRequest)))
+        mockMvc.perform(post("/api/v1/tags").contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createTagsRequest)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$[0].name").value("Test One"))
                 .andExpect(jsonPath("$[1].name").value("Test Two"));
@@ -103,7 +102,7 @@ public class TagControllerTest {
                 .names(Set.of())
                 .build();
 
-        mockMvc.perform(post("/api/v1/tags") .contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/api/v1/tags").contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createTagsRequest)))
                 .andExpect(status().isBadRequest());
     }
@@ -113,7 +112,7 @@ public class TagControllerTest {
         UUID id = UUID.randomUUID();
 
         mockMvc.perform(delete("/api/v1/tags/{id}", id))
-                        .andExpect(status().isNoContent());
-         verify(tagService).deleteTag(id);
+                .andExpect(status().isNoContent());
+        verify(tagService).deleteTag(id);
     }
 }
