@@ -10,7 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -37,6 +36,7 @@ public class AuthenticationServiceImplTest {
                 "this-is-a-test-secret-key-that-is-long-enough"
         );
     }
+
     @Test
     void authenticate_shouldReturnUserDetails() {
         String email = "test@test.com";
@@ -65,8 +65,8 @@ public class AuthenticationServiceImplTest {
         when(userDetailsService.loadUserByUsername(email))
                 .thenThrow(new BadCredentialsException("Bad credentials"));
 
-       assertThrows(BadCredentialsException.class,
-               () -> authenticationService.authenticate(email, password));
+        assertThrows(BadCredentialsException.class,
+                () -> authenticationService.authenticate(email, password));
     }
 
     @Test
