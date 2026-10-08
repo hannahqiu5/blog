@@ -5,7 +5,6 @@ import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.Tag;
 import com.hanqiu.blog.domain.entities.User;
-import com.hanqiu.blog.services.PostService;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

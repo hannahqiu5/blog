@@ -85,6 +85,7 @@ public class Post {
                 updatedAt
         );
     }
+
     @PrePersist // method called when entity is created
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();

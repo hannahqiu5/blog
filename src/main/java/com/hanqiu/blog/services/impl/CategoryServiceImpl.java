@@ -37,8 +37,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(UUID id) {
         Optional<Category> category = categoryRepository.findById(id);
-        if(category.isPresent()) {
-            if(category.get().getPosts().size() > 0) {
+        if (category.isPresent()) {
+            if (category.get().getPosts().size() > 0) {
                 throw new IllegalStateException("Category has posts associated with it.");
             }
         }
@@ -47,6 +47,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public Category getCategoryById(UUID id) {
-        return  categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category not found with id " + id));
+        return categoryRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Category not found with id " + id));
     }
 }

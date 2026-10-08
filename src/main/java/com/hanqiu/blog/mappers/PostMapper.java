@@ -3,7 +3,6 @@ package com.hanqiu.blog.mappers;
 import com.hanqiu.blog.domain.CreatePostRequest;
 import com.hanqiu.blog.domain.UpdatePostRequest;
 import com.hanqiu.blog.domain.dtos.CreatePostRequestDto;
-import com.hanqiu.blog.domain.dtos.CreateTagsRequest;
 import com.hanqiu.blog.domain.dtos.PostDto;
 import com.hanqiu.blog.domain.dtos.UpdatePostRequestDto;
 import com.hanqiu.blog.domain.entities.Post;
@@ -21,5 +20,5 @@ public interface PostMapper {
 
     CreatePostRequest toCreatePostRequest(CreatePostRequestDto dto);
 
-   UpdatePostRequest toUpdatePostRequest(UpdatePostRequestDto dto);
+    UpdatePostRequest toUpdatePostRequest(UpdatePostRequestDto dto);
 }

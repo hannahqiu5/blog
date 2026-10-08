@@ -48,8 +48,8 @@ public class TagServiceImpl implements TagService {
     @Transactional
     @Override
     public void deleteTag(UUID id) {
-        tagRepository.findById(id).ifPresent(tag ->{
-            if(!tag.getPosts().isEmpty()) {
+        tagRepository.findById(id).ifPresent(tag -> {
+            if (!tag.getPosts().isEmpty()) {
                 throw new IllegalStateException("Cannot delete tag with posts");
             }
             tagRepository.deleteById(id);
@@ -58,7 +58,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Tag getTagById(UUID id) {
-        return  tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag not found with id " + id));
+        return tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag not found with id " + id));
 
     }
 

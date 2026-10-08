@@ -1,7 +1,6 @@
 package com.hanqiu.blog.repositories;
 
 
-import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
