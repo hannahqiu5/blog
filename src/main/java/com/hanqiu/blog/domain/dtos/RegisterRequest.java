@@ -6,10 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class AuthResponse {
-    private String token;
-    private long expiresIn;
+@NoArgsConstructor
+@Builder
+public class RegisterRequest {
+    private String username;
+    private String email;
+    private String password;
 }

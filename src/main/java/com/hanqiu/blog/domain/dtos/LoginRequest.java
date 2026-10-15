@@ -1,6 +1,5 @@
 package com.hanqiu.blog.domain.dtos;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
