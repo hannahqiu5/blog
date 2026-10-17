@@ -4,6 +4,7 @@ import com.hanqiu.blog.domain.dtos.LoginRequest;
 import com.hanqiu.blog.domain.dtos.LoginResponse;
 import com.hanqiu.blog.domain.dtos.RegisterRequest;
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.Role;
 import com.hanqiu.blog.repositories.UserRepository;
 import com.hanqiu.blog.services.AuthenticationService;
 import io.jsonwebtoken.Claims;
@@ -76,6 +77,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .email(request.getEmail())
                 .name(request.getUsername())
                 .password(encodedPassword)
+                .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .build();
         return   userRepository.save(newUser);
@@ -96,7 +98,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private String extractUsername(String token) {
-        Claims claims = Jwts.parserBuilder()
+         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)

@@ -1,7 +1,7 @@
 package com.hanqiu.blog.domain.entities;
 
 
-import com.hanqiu.blog.domain.PostStatus;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import jakarta.persistence.*;
 import lombok.*;
 

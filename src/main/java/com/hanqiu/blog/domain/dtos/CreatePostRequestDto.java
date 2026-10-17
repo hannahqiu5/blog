@@ -1,6 +1,6 @@
 package com.hanqiu.blog.domain.dtos;
 
-import com.hanqiu.blog.domain.PostStatus;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

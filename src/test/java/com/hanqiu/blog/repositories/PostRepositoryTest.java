@@ -1,6 +1,6 @@
 package com.hanqiu.blog.repositories;
 
-import com.hanqiu.blog.domain.PostStatus;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.entities.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

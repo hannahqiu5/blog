@@ -1,6 +1,6 @@
 package com.hanqiu.blog.repositories;
 
-import com.hanqiu.blog.domain.PostStatus;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.Tag;

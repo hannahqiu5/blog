@@ -1,6 +1,6 @@
 package com.hanqiu.blog.mappers;
 
-import com.hanqiu.blog.domain.PostStatus;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.dtos.TagDto;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.Tag;

@@ -1,5 +1,6 @@
 package com.hanqiu.blog.domain;
 
+import com.hanqiu.blog.domain.enums.PostStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

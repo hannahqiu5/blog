@@ -1,7 +1,7 @@
 package com.hanqiu.blog.services;
 
 import com.hanqiu.blog.domain.CreatePostRequest;
-import com.hanqiu.blog.domain.PostStatus;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.UpdatePostRequest;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;

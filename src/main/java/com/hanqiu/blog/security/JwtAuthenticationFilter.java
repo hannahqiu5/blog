@@ -40,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception ex) {
-            log.warn("Received invalid auth token.");
+            log.warn("Received invalid auth token.", ex.getMessage(), ex);
         }
         filterChain.doFilter(request, response);
     }

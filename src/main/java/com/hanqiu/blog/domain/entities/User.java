@@ -1,5 +1,6 @@
 package com.hanqiu.blog.domain.entities;
 
+import com.hanqiu.blog.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -36,6 +37,10 @@ public class User {
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Override
     public boolean equals(Object o) {
