@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 
+import java.util.List;
+
 @RestController
 @ControllerAdvice
 @Slf4j
@@ -84,9 +86,20 @@ public class ErrorController {
     public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValidException(
             MethodArgumentNotValidException ex) {
 
+        List<ApiErrorResponse.FieldError> errors =
+                ex.getBindingResult()
+                        .getFieldErrors()
+                        .stream()
+                        .map(error -> ApiErrorResponse.FieldError.builder()
+                                .field(error.getField())
+                                .message(error.getDefaultMessage())
+                                .build())
+                        .toList();
+
         ApiErrorResponse error = ApiErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.value())
                 .message("Validation failed")
+                .errors(errors)
                 .build();
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);

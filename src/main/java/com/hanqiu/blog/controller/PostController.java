@@ -55,8 +55,8 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<PostDto> createPost(
-            @RequestBody CreatePostRequestDto createPostRequestDto,
-            @Valid @RequestAttribute UUID userId
+            @Valid @RequestBody CreatePostRequestDto createPostRequestDto,
+            @RequestAttribute UUID userId
     ) {
 
         User loggedInUser = userService.getUserById(userId);
