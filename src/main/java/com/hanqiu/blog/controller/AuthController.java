@@ -1,7 +1,10 @@
 package com.hanqiu.blog.controller;
 
 
-import com.hanqiu.blog.domain.dtos.*;
+import com.hanqiu.blog.domain.dtos.LoginRequest;
+import com.hanqiu.blog.domain.dtos.LoginResponse;
+import com.hanqiu.blog.domain.dtos.RegisterRequest;
+import com.hanqiu.blog.domain.dtos.RegisterResponse;
 import com.hanqiu.blog.domain.entities.User;
 import com.hanqiu.blog.services.AuthenticationService;
 import com.hanqiu.blog.services.UserService;

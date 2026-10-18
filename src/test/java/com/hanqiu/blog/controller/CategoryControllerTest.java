@@ -8,6 +8,7 @@ import com.hanqiu.blog.services.CategoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -25,7 +26,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 //@WebMvcTest + MockMvc + Mockito
 
-@WebMvcTest(CategoryController.class)
+@WebMvcTest(controllers = CategoryController.class,
+        excludeAutoConfiguration = {
+                OAuth2ClientWebSecurityAutoConfiguration.class
+        })
 public class CategoryControllerTest {
     @Autowired
     private MockMvc mockMvc;

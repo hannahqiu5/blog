@@ -1,17 +1,21 @@
 package com.hanqiu.blog.repositories;
 
-import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.Tag;
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.PostStatus;
+import com.hanqiu.blog.domain.enums.Role;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -89,6 +93,7 @@ public class CategoryRepositoryTest {
                 .email("test@test.com")
                 .password("pass123")
                 .name("u1")
+                .role(Role.ADMIN)
                 .build();
 
         categoryRepository.save(cat);

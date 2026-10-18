@@ -1,19 +1,21 @@
 package com.hanqiu.blog.controller;
 
 import com.hanqiu.blog.domain.CreatePostRequest;
-import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.UpdatePostRequest;
 import com.hanqiu.blog.domain.dtos.*;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.mappers.PostMapper;
 import com.hanqiu.blog.services.PostService;
 import com.hanqiu.blog.services.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,6 +24,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -29,7 +32,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@WebMvcTest(PostController.class)
+@WebMvcTest(
+        controllers = PostController.class,
+        excludeAutoConfiguration = {
+                OAuth2ClientWebSecurityAutoConfiguration.class
+        })
 public class PostControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -87,6 +94,7 @@ public class PostControllerTest {
                 .content("Test Content")
                 .author(user)
                 .category(category)
+                .status(PostStatus.DRAFT)
                 .build();
 
 
@@ -108,25 +116,48 @@ public class PostControllerTest {
                 .title("Test Title")
                 .content("Test Content")
                 .categoryId(category.getId())
+                .status(PostStatus.DRAFT)
                 .build();
     }
 
-//    @Test
-//    void getAllPosts_shouldReturn200() throws Exception {
-//        when(postService.getAllPosts(null, null))
-//                .thenReturn(List.of(post));
-//
-//        when(postMapper.toDto(post))
-//                .thenReturn(postDto);
-//
-//        mockMvc.perform(get("/api/v1/posts"))
-//                .andExpect(status().isOk())
-//                .andExpect(jsonPath("$[0].title").value("Test Title"))
-//                .andExpect(jsonPath("$[0].content").value("Test Content"));
-//
-//        verify(postService).getAllPosts(null, null);
-//        verify(postMapper).toDto(post);
-//    }
+    @Test
+    void getAllPosts_shouldReturn200() throws Exception {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Post> posts = new PageImpl<>(
+                List.of(post),
+                pageable,
+                1
+        );
+
+        when(postService.getAllPosts(
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(posts);
+
+        when(postMapper.toDto(post))
+                .thenReturn(postDto);
+
+        mockMvc.perform(get("/api/v1/posts"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id")
+                        .value(post.getId().toString()))
+                .andExpect(jsonPath("$.content[0].title")
+                        .value("Test Title"))
+                .andExpect(jsonPath("$.content[0].content")
+                        .value("Test Content"))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.size").value(5))
+                .andExpect(jsonPath("$.number").value(0));
+
+        verify(postService).getAllPosts(
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        );
+        verify(postMapper).toDto(post);
+    }
 
     @Test
     void getPost_shouldReturn200() throws Exception {
@@ -165,30 +196,33 @@ public class PostControllerTest {
         verify(postMapper).toDto(post);
     }
 
-//    @Test
-//    void createPost_shouldReturn201() throws Exception {
-//        when(userService.getUserById(user.getId()))
-//                .thenReturn(user);
-//        when(postMapper.toCreatePostRequest(requestDto))
-//                .thenReturn(request);
-//        when(postService.createPost(user, request))
-//                .thenReturn(post);
-//        when(postMapper.toDto(post))
-//                .thenReturn(postDto);
-//
-//        mockMvc.perform(post("/api/v1/posts")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(requestDto))
-//                        .requestAttr("userId", user.getId()))
-//                .andExpect(status().isCreated())
-//                .andExpect(jsonPath("$.title").value("Test Title"))
-//                .andExpect(jsonPath("$.content").value("Test Content"));
-//
-//        verify(userService).getUserById(user.getId());
-//        verify(postMapper).toCreatePostRequest(requestDto);
-//        verify(postService).createPost(user, request);
-//        verify(postMapper).toDto(post);
-//    }
+    @Test
+    void createPost_shouldReturn201() throws Exception {
+        when(userService.getUserById(user.getId()))
+                .thenReturn(user);
+
+        when(postMapper.toCreatePostRequest(requestDto))
+                .thenReturn(request);
+
+        when(postService.createPost(user, request))
+                .thenReturn(post);
+
+        when(postMapper.toDto(post))
+                .thenReturn(postDto);
+
+        mockMvc.perform(post("/api/v1/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDto))
+                        .requestAttr("userId", user.getId()))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.title").value("Test Title"))
+                .andExpect(jsonPath("$.content").value("Test Content"));
+
+        verify(userService).getUserById(user.getId());
+        verify(postMapper).toCreatePostRequest(requestDto);
+        verify(postService).createPost(user, request);
+        verify(postMapper).toDto(post);
+    }
 
     @Test
     void updatePost_shouldReturn200() throws Exception {
@@ -250,4 +284,42 @@ public class PostControllerTest {
         verify(postService).deletePost(id);
     }
 
+    @Test
+    void getAllPosts_shouldAcceptPageAndSizeParameters() throws Exception {
+        Pageable pageable = PageRequest.of(
+                1, 2,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<Post> posts = new PageImpl<>(
+                List.of(post),
+                pageable,
+                5
+        );
+
+        when(postService.getAllPosts(
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(posts);
+
+        when(postMapper.toDto(post)).thenReturn(postDto);
+
+        mockMvc.perform(get("/api/v1/posts")
+                        .param("page", "1")
+                        .param("size", "2"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.number").value(1))
+                .andExpect(jsonPath("$.size").value(2))
+                .andExpect(jsonPath("$.totalElements").value(5))
+                .andExpect(jsonPath("$.totalPages").value(3))
+                .andExpect(jsonPath("$.content.length()").value(1));
+
+        verify(postService).getAllPosts(
+                isNull(),
+                isNull(),
+                argThat(p -> p.getPageNumber() == 1
+                        && p.getPageSize() == 2)
+        );
+    }
 }

@@ -7,11 +7,9 @@ import com.hanqiu.blog.domain.dtos.PostDto;
 import com.hanqiu.blog.domain.dtos.UpdatePostRequestDto;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.User;
-import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.mappers.PostMapper;
 import com.hanqiu.blog.services.PostService;
 import com.hanqiu.blog.services.UserService;
-import jakarta.servlet.ServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,7 +36,7 @@ public class PostController {
     public ResponseEntity<Page<PostDto>> getAllPosts(
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(required = false) UUID tagId,
-            @PageableDefault(size=5, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
     ) {
         Page<Post> posts = postService.getAllPosts(categoryId, tagId, pageable);
         Page<PostDto> postDtos = posts.map(postMapper::toDto);

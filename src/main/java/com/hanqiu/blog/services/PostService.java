@@ -4,7 +4,6 @@ import com.hanqiu.blog.domain.CreatePostRequest;
 import com.hanqiu.blog.domain.UpdatePostRequest;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.User;
-import com.hanqiu.blog.domain.enums.PostStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

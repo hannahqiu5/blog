@@ -1,10 +1,10 @@
 package com.hanqiu.blog.mappers;
 
-import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.dtos.CategoryDto;
 import com.hanqiu.blog.domain.dtos.CreateCategoryRequest;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

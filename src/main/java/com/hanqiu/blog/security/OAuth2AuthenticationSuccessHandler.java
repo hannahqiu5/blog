@@ -3,15 +3,14 @@ package com.hanqiu.blog.security;
 import com.hanqiu.blog.domain.entities.User;
 import com.hanqiu.blog.repositories.UserRepository;
 import com.hanqiu.blog.services.AuthenticationService;
-import com.hanqiu.blog.services.UserService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 

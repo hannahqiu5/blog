@@ -1,9 +1,9 @@
 package com.hanqiu.blog.mappers;
 
-import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.dtos.TagDto;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.Tag;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

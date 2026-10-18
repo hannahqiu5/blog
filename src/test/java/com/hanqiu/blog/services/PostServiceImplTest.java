@@ -1,12 +1,12 @@
 package com.hanqiu.blog.services;
 
 import com.hanqiu.blog.domain.CreatePostRequest;
-import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.UpdatePostRequest;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.Tag;
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.repositories.PostRepository;
 import com.hanqiu.blog.services.impl.CategoryServiceImpl;
 import com.hanqiu.blog.services.impl.PostServiceImpl;
@@ -18,6 +18,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,8 +30,7 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class PostServiceImplTest {
@@ -88,22 +91,83 @@ public class PostServiceImplTest {
         posts = List.of(post1, post2);
     }
 
-//    @Test
-//    void getAllPosts() {
-//        when(categoryService.getCategoryById(category.getId()))
-//                .thenReturn(category);
-//        when(tagService.getTagById(tag.getId()))
-//                .thenReturn(tag);
-//        when(postRepository.findAllByStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag))
-//                .thenReturn(posts);
-//
-//        List<Post> result = postService.getAllPosts(category.getId(), tag.getId());
-//
-//        assertEquals(posts, result);
-//
-//        verify(categoryService).getCategoryById(category.getId());
-//        verify(tagService).getTagById(tag.getId());
-//    }
+    @Test
+    void getAllPosts() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Post> expectedPage = new PageImpl<>(posts, pageable, posts.size());
+
+        when(categoryService.getCategoryById(category.getId()))
+                .thenReturn(category);
+        when(tagService.getTagById(tag.getId()))
+                .thenReturn(tag);
+        when(postRepository.findAllByStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag, pageable))
+                .thenReturn(expectedPage);
+
+        Page<Post> result = postService.getAllPosts(category.getId(), tag.getId(), pageable);
+
+        assertEquals(expectedPage, result);
+
+
+        verify(categoryService).getCategoryById(category.getId());
+        verify(tagService).getTagById(tag.getId());
+        verify(postRepository).findAllByStatusAndCategoryAndTagsContaining(
+                PostStatus.PUBLISHED, category, tag, pageable);
+    }
+
+
+    @Test
+    void getAllPosts_WithCategory() {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Post> expectedPage =
+                new PageImpl<>(posts, pageable, posts.size());
+
+        when(categoryService.getCategoryById(category.getId()))
+                .thenReturn(category);
+
+        when(postRepository.findAllByStatusAndCategory(
+                PostStatus.PUBLISHED,
+                category,
+                pageable
+        )).thenReturn(expectedPage);
+
+        Page<Post> result =
+                postService.getAllPosts(category.getId(), null, pageable);
+
+        assertEquals(expectedPage, result);
+        assertEquals(posts, result.getContent());
+
+        verify(categoryService).getCategoryById(category.getId());
+
+        verify(postRepository).findAllByStatusAndCategory(
+                PostStatus.PUBLISHED,
+                category,
+                pageable
+        );
+
+        verifyNoInteractions(tagService);
+    }
+
+    @Test
+    void getAllPosts_withoutFilters_shouldReturnPagedPosts() {
+        // Arrange
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Post> expectedPage = new PageImpl<>(posts, pageable, posts.size());
+
+        when(postRepository.findAllByStatus(PostStatus.PUBLISHED, pageable))
+                .thenReturn(expectedPage);
+
+        // Act
+        Page<Post> result = postService.getAllPosts(null, null, pageable);
+
+        // Assert
+        assertEquals(expectedPage, result);
+        assertEquals(2, result.getContent().size());
+        assertEquals(0, result.getNumber());
+        assertEquals(5, result.getSize());
+        assertEquals(2, result.getTotalElements());
+
+        verify(postRepository).findAllByStatus(PostStatus.PUBLISHED, pageable);
+    }
 
     @Test
     void getDraftPosts() {

@@ -3,7 +3,6 @@ package com.hanqiu.blog.security;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.User;
 import com.hanqiu.blog.repositories.PostRepository;
-import com.hanqiu.blog.services.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;

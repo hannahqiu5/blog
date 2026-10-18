@@ -1,6 +1,7 @@
 package com.hanqiu.blog.config;
 
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.Role;
 import com.hanqiu.blog.repositories.UserRepository;
 import com.hanqiu.blog.security.BlogUserDetailsService;
 import com.hanqiu.blog.security.JwtAuthenticationFilter;
@@ -10,7 +11,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -38,6 +38,7 @@ public class SecurityConfig {
                     .name("Test User")
                     .email("test@abc.com")
                     .password(passwordEncoder().encode("pass123!"))
+                    .role(Role.USER)
                     .build();
             return userRepository.save(newUser);
         });
@@ -64,7 +65,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(oauth2->oauth2
+                .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2AuthenticationSuccessHandler));
         return http.build();
     }

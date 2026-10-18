@@ -1,19 +1,26 @@
 package com.hanqiu.blog.controller;
 
+import com.hanqiu.blog.domain.dtos.LoginRequest;
+import com.hanqiu.blog.domain.dtos.LoginResponse;
 import com.hanqiu.blog.services.AuthenticationService;
+import com.hanqiu.blog.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.security.oauth2.client.autoconfigure.servlet.OAuth2ClientWebSecurityAutoConfiguration;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthController.class)
+@WebMvcTest(controllers = AuthController.class,
+        excludeAutoConfiguration = {
+                OAuth2ClientWebSecurityAutoConfiguration.class
+        })
 public class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
@@ -21,19 +28,23 @@ public class AuthControllerTest {
     @MockitoBean
     private AuthenticationService authenticationService;
 
+    @MockitoBean
+    private UserService userService;
+
     @Test
     void login_shouldReturnAuthResponse() throws Exception {
         LoginRequest request = LoginRequest.builder()
                 .email("test@abc.com")
                 .password("pass123")
                 .build();
-        UserDetails userDetails = mock(UserDetails.class);
 
-        when(authenticationService.authenticate(request.getEmail(),
-                request.getPassword()))
-                .thenReturn(userDetails);
-        when(authenticationService.generateToken(userDetails))
-                .thenReturn("test-jwt-token");
+        LoginResponse response = LoginResponse.builder()
+                .jwt("test-jwt-token")
+                .expiresIn(86400)
+                .build();
+
+        when(authenticationService.login(any(LoginRequest.class)))
+                .thenReturn(response);
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -44,12 +55,11 @@ public class AuthControllerTest {
                                 }
                                 """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("test-jwt-token"))
+                .andExpect(jsonPath("$.jwt").value("test-jwt-token"))
                 .andExpect(jsonPath("$.expiresIn").value(86400));
-        ;
 
-        verify(authenticationService).authenticate(request.getEmail(), request.getPassword());
-        verify(authenticationService).generateToken(userDetails);
+        verify(authenticationService).login(any(LoginRequest.class));
+
     }
 
 

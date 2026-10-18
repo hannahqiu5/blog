@@ -1,10 +1,11 @@
 package com.hanqiu.blog.repositories;
 
-import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.Tag;
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.PostStatus;
+import com.hanqiu.blog.domain.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,7 @@ public class TagRepositoryTest {
                 .email("test@test.com")
                 .password("password123")
                 .name("Test User")
+                .role(Role.ADMIN)
                 .build();
 
         category = Category.builder()

@@ -1,21 +1,28 @@
 package com.hanqiu.blog.repositories;
 
+import com.hanqiu.blog.domain.entities.Category;
+import com.hanqiu.blog.domain.entities.Post;
+import com.hanqiu.blog.domain.entities.Tag;
+import com.hanqiu.blog.domain.entities.User;
 import com.hanqiu.blog.domain.enums.PostStatus;
-import com.hanqiu.blog.domain.entities.*;
-import org.junit.jupiter.api.Assertions;
+import com.hanqiu.blog.domain.enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.jpa.test.autoconfigure.TestEntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 public class PostRepositoryTest {
@@ -26,6 +33,9 @@ public class PostRepositoryTest {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private TestEntityManager entityManager;
 
     @Autowired
     private TagRepository tagRepository;
@@ -56,11 +66,13 @@ public class PostRepositoryTest {
                 .email("u1@test.com")
                 .password("password123")
                 .name("Test user1")
+                .role(Role.ADMIN)
                 .build();
         user2 = User.builder()
                 .email("u2@test.com")
                 .password("password123")
                 .name("Test user2")
+                .role(Role.ADMIN)
                 .build();
 
         cat = Category.builder()
@@ -173,86 +185,164 @@ public class PostRepositoryTest {
         ));
     }
 
-//    @Test
-//    void findAllByStatusAndCategoryAndTagsContaining_shouldReturnPosts() {
-//
-//        List<Post> result = postRepository.findAllByStatusAndCategoryAndTagsContaining(
-//                PostStatus.PUBLISHED,
-//                cat,
-//                tag
-//        );
-//
-//        assertEquals(4, result.size());
-//        assertTrue(result.contains(postWithCatTagPublished));
-//        assertTrue(result.contains(publishedPostWithCatTag));
-//        assertTrue(result.contains(postWithCat1TagPublished ));
-//        assertTrue(result.contains(postWithCatTagPublishedByUser2 ));
-//
-//    }
+    @Test
+    void findAllByStatusAndCategoryAndTagsContaining_shouldReturnPosts() {
+        Pageable pageable = PageRequest.of(0, 10);
 
+        Page<Post> result =
+                postRepository.findAllByStatusAndCategoryAndTagsContaining(
+                        PostStatus.PUBLISHED,
+                        cat,
+                        tag,
+                        pageable
+                );
 
-//    @Test
-//    void findAllByStatusAndCategory_shouldReturnPosts() {
-//        List<Post> result = postRepository.findAllByStatusAndCategory(
-//                PostStatus.DRAFT,
-//                cat
-//        );
-//
-//        Assertions.assertEquals(1, result.size());
-//        assertTrue(result.contains(draftPostWithCatTag));
-//    }
+        assertEquals(4, result.getTotalElements());
 
-//    @Test
-//    void findAllByStatusAndTagsContaining_shouldReturnPosts() {
-//        List<Post> result = postRepository.findAllByStatusAndTagsContaining(
-//                PostStatus.PUBLISHED,
-//                tag2
-//        );
-//
-//        Assertions.assertEquals(1, result.size());
-//        assertTrue(result.contains(postWithCatTag2Published));
-//    }
+        assertTrue(result.getContent().contains(postWithCatTagPublished));
+        assertTrue(result.getContent().contains(publishedPostWithCatTag));
+        assertTrue(result.getContent().contains(postWithCat1TagPublished));
+        assertTrue(result.getContent().contains(postWithCatTagPublishedByUser2));
 
+        assertTrue(result.getContent().stream()
+                .allMatch(post -> post.getStatus() == PostStatus.PUBLISHED));
+    }
 
+    @Test
+    void findAllByStatusAndCategory_shouldReturnPosts() {
+        Pageable pageable = PageRequest.of(0, 5);
 
-//    @Test
-//    void findAllByStatus_shouldReturnPosts() {
-//        List<Post> result = postRepository.findAllByStatus(
-//                PostStatus.DRAFT,
-//                pageable
-//        );
-//
-//        Assertions.assertEquals(1, result.size());
-//        assertTrue(result.contains(draftPostWithCatTag));
-//    }
+        Page<Post> result = postRepository.findAllByStatusAndCategory(
+                PostStatus.PUBLISHED,
+                cat,
+                pageable
+        );
+
+        assertEquals(5, result.getTotalElements());
+        assertTrue(result.getContent().contains(postWithCatTagPublished));
+        assertTrue(result.getContent().contains(publishedPostWithCatTag));
+    }
+
+    @Test
+    void findAllByStatus_shouldReturnDraftPosts() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        Page<Post> result = postRepository.findAllByStatus(
+                PostStatus.DRAFT,
+                pageable
+        );
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+
+        assertTrue(result.getContent().contains(draftPostWithCatTag));
+
+        assertTrue(result.getContent().stream()
+                .allMatch(post -> post.getStatus() == PostStatus.DRAFT));
+    }
+
+    @Test
+    void save_shouldReturnSavedPost() {
+        Post newPost = Post.builder()
+                .title("New Post")
+                .content("New content")
+                .author(user1)
+                .category(cat)
+                .tags(new HashSet<>(Set.of(tag)))
+                .status(PostStatus.PUBLISHED)
+                .readingTime(1)
+                .build();
+
+        Post result = postRepository.save(newPost);
+
+        assertEquals(newPost, result);
+    }
 
 
     @Test
-    void findAllByAuthorAndStatus_shouldReturnPosts() {
-        List<Post> result = postRepository.findAllByAuthorAndStatus(
-                user2,
-                PostStatus.PUBLISHED
+    void findAllByStatus_ReturnsPagedPublishedPosts() {
+        Pageable pageable = PageRequest.of(
+                0,
+                2,
+                Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        Assertions.assertEquals(1, result.size());
-        assertTrue(result.contains(postWithCatTagPublishedByUser2));
-    }
-//
-//    @Test
-//    void save_shouldReturnSavedPost() {
-//        Post newPost = Post.builder()
-//                .title("New Post")
-//                .content("New content")
-//                .author(user1)
-//                .category(cat)
-//                .tags(new HashSet<>(Set.of(tag)))
-//                .status(PostStatus.PUBLISHED)
-//                .readingTime(1)
-//                .build();
-//
-//        Post result = postRepository.save(newPost);
-//
-//        assertEquals(newPost, result);
-//    }
+        Page<Post> result = postRepository.findAllByStatus(
+                PostStatus.PUBLISHED,
+                pageable
+        );
 
+        // Verify page size
+        assertEquals(2, result.getContent().size());
+
+        // Verify total number of published posts
+        assertEquals(6, result.getTotalElements());
+
+        // Verify total pages
+        assertEquals(3, result.getTotalPages());
+
+        // Verify current page (zero-based)
+        assertEquals(0, result.getNumber());
+
+        // Verify page size
+        assertEquals(2, result.getSize());
+
+        // Verify all posts are published
+        assertTrue(result.getContent().stream()
+                .allMatch(post -> post.getStatus() == PostStatus.PUBLISHED));
+    }
+
+    @Test
+    void findAllByStatus_ReturnsSecondPage() {
+        Pageable firstPageRequest = PageRequest.of(
+                0,
+                2,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+                        .and(Sort.by(Sort.Direction.DESC, "id"))
+        );
+
+        Pageable secondPageRequest = PageRequest.of(
+                1,
+                2,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+                        .and(Sort.by(Sort.Direction.DESC, "id"))
+        );
+
+        Page<Post> firstPage = postRepository.findAllByStatus(
+                PostStatus.PUBLISHED, firstPageRequest
+        );
+
+        Page<Post> secondPage = postRepository.findAllByStatus(
+                PostStatus.PUBLISHED, secondPageRequest
+        );
+
+        assertEquals(0, firstPage.getNumber());
+        assertEquals(1, secondPage.getNumber());
+
+        assertEquals(2, firstPage.getContent().size());
+        assertEquals(2, secondPage.getContent().size());
+
+        Set<java.util.UUID> firstPageIds = firstPage.getContent()
+                .stream()
+                .map(Post::getId)
+                .collect(java.util.stream.Collectors.toSet());
+
+        assertTrue(secondPage.getContent().stream()
+                .map(Post::getId)
+                .noneMatch(firstPageIds::contains));
+    }
+
+    @Test
+    void findAllByStatus_ReturnsEmptyPageWhenNoPostsMatch() {
+        Pageable pageable = PageRequest.of(0, 5);
+
+        Page<Post> result = postRepository.findAllByStatus(
+                null,
+                pageable
+        );
+
+        assertTrue(result.isEmpty());
+        assertEquals(0, result.getTotalElements());
+        assertEquals(0, result.getTotalPages());
+    }
 }

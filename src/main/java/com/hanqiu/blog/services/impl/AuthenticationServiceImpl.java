@@ -67,7 +67,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public User register(RegisterRequest request) {
         Optional<User> user = userRepository.findByEmail(request.getEmail());
-        if(user.isPresent()) {
+        if (user.isPresent()) {
             throw new IllegalStateException("User already exists");
         }
 
@@ -80,7 +80,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .role(Role.USER)
                 .createdAt(LocalDateTime.now())
                 .build();
-        return   userRepository.save(newUser);
+        return userRepository.save(newUser);
     }
 
     @Override
@@ -98,7 +98,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     private String extractUsername(String token) {
-         Claims claims = Jwts.parserBuilder()
+        Claims claims = Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
