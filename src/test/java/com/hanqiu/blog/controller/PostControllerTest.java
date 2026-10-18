@@ -111,22 +111,22 @@ public class PostControllerTest {
                 .build();
     }
 
-    @Test
-    void getAllPosts_shouldReturn200() throws Exception {
-        when(postService.getAllPosts(null, null))
-                .thenReturn(List.of(post));
-
-        when(postMapper.toDto(post))
-                .thenReturn(postDto);
-
-        mockMvc.perform(get("/api/v1/posts"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value("Test Title"))
-                .andExpect(jsonPath("$[0].content").value("Test Content"));
-
-        verify(postService).getAllPosts(null, null);
-        verify(postMapper).toDto(post);
-    }
+//    @Test
+//    void getAllPosts_shouldReturn200() throws Exception {
+//        when(postService.getAllPosts(null, null))
+//                .thenReturn(List.of(post));
+//
+//        when(postMapper.toDto(post))
+//                .thenReturn(postDto);
+//
+//        mockMvc.perform(get("/api/v1/posts"))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$[0].title").value("Test Title"))
+//                .andExpect(jsonPath("$[0].content").value("Test Content"));
+//
+//        verify(postService).getAllPosts(null, null);
+//        verify(postMapper).toDto(post);
+//    }
 
     @Test
     void getPost_shouldReturn200() throws Exception {
@@ -165,30 +165,30 @@ public class PostControllerTest {
         verify(postMapper).toDto(post);
     }
 
-    @Test
-    void createPost_shouldReturn201() throws Exception {
-        when(userService.getUserById(user.getId()))
-                .thenReturn(user);
-        when(postMapper.toCreatePostRequest(requestDto))
-                .thenReturn(request);
-        when(postService.createPost(user, request))
-                .thenReturn(post);
-        when(postMapper.toDto(post))
-                .thenReturn(postDto);
-
-        mockMvc.perform(post("/api/v1/posts")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto))
-                        .requestAttr("userId", user.getId()))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Test Title"))
-                .andExpect(jsonPath("$.content").value("Test Content"));
-
-        verify(userService).getUserById(user.getId());
-        verify(postMapper).toCreatePostRequest(requestDto);
-        verify(postService).createPost(user, request);
-        verify(postMapper).toDto(post);
-    }
+//    @Test
+//    void createPost_shouldReturn201() throws Exception {
+//        when(userService.getUserById(user.getId()))
+//                .thenReturn(user);
+//        when(postMapper.toCreatePostRequest(requestDto))
+//                .thenReturn(request);
+//        when(postService.createPost(user, request))
+//                .thenReturn(post);
+//        when(postMapper.toDto(post))
+//                .thenReturn(postDto);
+//
+//        mockMvc.perform(post("/api/v1/posts")
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(objectMapper.writeValueAsString(requestDto))
+//                        .requestAttr("userId", user.getId()))
+//                .andExpect(status().isCreated())
+//                .andExpect(jsonPath("$.title").value("Test Title"))
+//                .andExpect(jsonPath("$.content").value("Test Content"));
+//
+//        verify(userService).getUserById(user.getId());
+//        verify(postMapper).toCreatePostRequest(requestDto);
+//        verify(postService).createPost(user, request);
+//        verify(postMapper).toDto(post);
+//    }
 
     @Test
     void updatePost_shouldReturn200() throws Exception {

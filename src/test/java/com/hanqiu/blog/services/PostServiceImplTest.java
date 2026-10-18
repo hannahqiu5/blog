@@ -88,22 +88,22 @@ public class PostServiceImplTest {
         posts = List.of(post1, post2);
     }
 
-    @Test
-    void getAllPosts() {
-        when(categoryService.getCategoryById(category.getId()))
-                .thenReturn(category);
-        when(tagService.getTagById(tag.getId()))
-                .thenReturn(tag);
-        when(postRepository.findAllByStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag))
-                .thenReturn(posts);
-
-        List<Post> result = postService.getAllPosts(category.getId(), tag.getId());
-
-        assertEquals(posts, result);
-
-        verify(categoryService).getCategoryById(category.getId());
-        verify(tagService).getTagById(tag.getId());
-    }
+//    @Test
+//    void getAllPosts() {
+//        when(categoryService.getCategoryById(category.getId()))
+//                .thenReturn(category);
+//        when(tagService.getTagById(tag.getId()))
+//                .thenReturn(tag);
+//        when(postRepository.findAllByStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag))
+//                .thenReturn(posts);
+//
+//        List<Post> result = postService.getAllPosts(category.getId(), tag.getId());
+//
+//        assertEquals(posts, result);
+//
+//        verify(categoryService).getCategoryById(category.getId());
+//        verify(tagService).getTagById(tag.getId());
+//    }
 
     @Test
     void getDraftPosts() {

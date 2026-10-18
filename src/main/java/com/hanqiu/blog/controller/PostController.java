@@ -7,11 +7,17 @@ import com.hanqiu.blog.domain.dtos.PostDto;
 import com.hanqiu.blog.domain.dtos.UpdatePostRequestDto;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.PostStatus;
 import com.hanqiu.blog.mappers.PostMapper;
 import com.hanqiu.blog.services.PostService;
 import com.hanqiu.blog.services.UserService;
+import jakarta.servlet.ServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,12 +35,13 @@ public class PostController {
     private final UserService userService;
 
     @GetMapping
-    public ResponseEntity<List<PostDto>> getAllPosts(
+    public ResponseEntity<Page<PostDto>> getAllPosts(
             @RequestParam(required = false) UUID categoryId,
-            @RequestParam(required = false) UUID tagId
+            @RequestParam(required = false) UUID tagId,
+            @PageableDefault(size=5, sort = "createdAt", direction = Sort.Direction.DESC)Pageable pageable
     ) {
-        List<Post> posts = postService.getAllPosts(categoryId, tagId);
-        List<PostDto> postDtos = posts.stream().map(postMapper::toDto).toList();
+        Page<Post> posts = postService.getAllPosts(categoryId, tagId, pageable);
+        Page<PostDto> postDtos = posts.map(postMapper::toDto);
         return ResponseEntity.ok(postDtos);
     }
 
@@ -52,6 +59,7 @@ public class PostController {
         List<PostDto> postDtos = postService.getDraftPosts(loggedInUser).stream().map(postMapper::toDto).toList();
         return ResponseEntity.ok(postDtos);
     }
+
 
     @PostMapping
     public ResponseEntity<PostDto> createPost(

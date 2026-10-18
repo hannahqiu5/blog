@@ -4,13 +4,16 @@ import com.hanqiu.blog.domain.CreatePostRequest;
 import com.hanqiu.blog.domain.UpdatePostRequest;
 import com.hanqiu.blog.domain.entities.Post;
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.PostStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface PostService {
 
-    List<Post> getAllPosts(UUID categoryId, UUID tagId);
+    Page<Post> getAllPosts(UUID categoryId, UUID tagId, Pageable pageable);
 
     List<Post> getDraftPosts(User user);
 
@@ -21,4 +24,5 @@ public interface PostService {
     Post getPost(UUID id);
 
     void deletePost(UUID id);
+
 }

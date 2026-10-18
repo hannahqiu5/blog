@@ -13,6 +13,8 @@ import com.hanqiu.blog.services.PostService;
 import com.hanqiu.blog.services.TagService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,24 +35,24 @@ public class PostServiceImpl implements PostService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<Post> getAllPosts(UUID categoryId, UUID tagId) {
+    public Page<Post> getAllPosts(UUID categoryId, UUID tagId, Pageable pageable) {
         if (categoryId != null && tagId != null) {
             Category category = categoryService.getCategoryById(categoryId);
             Tag tag = tagService.getTagById(tagId);
-            return postRepository.findAllByStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag);
+            return postRepository.findAllByStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag, pageable);
 
         }
         if (categoryId != null) {
             Category category = categoryService.getCategoryById(categoryId);
-            return postRepository.findAllByStatusAndCategory(PostStatus.PUBLISHED, category);
+            return postRepository.findAllByStatusAndCategory(PostStatus.PUBLISHED, category, pageable);
         }
 
         if (tagId != null) {
             Tag tag = tagService.getTagById(tagId);
-            return postRepository.findAllByStatusAndTagsContaining(PostStatus.PUBLISHED, tag);
+            return postRepository.findAllByStatusAndTagsContaining(PostStatus.PUBLISHED, tag, pageable);
         }
 
-        return postRepository.findAllByStatus(PostStatus.PUBLISHED);
+        return postRepository.findAllByStatus(PostStatus.PUBLISHED, pageable);
     }
 
     @Override
