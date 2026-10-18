@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface PostService {
 
-    Page<Post> getAllPosts(UUID categoryId, UUID tagId, Pageable pageable);
+    Page<Post> getAllPosts(UUID categoryId, UUID tagId, Pageable pageable,String keyword);
 
     List<Post> getDraftPosts(User user);
 

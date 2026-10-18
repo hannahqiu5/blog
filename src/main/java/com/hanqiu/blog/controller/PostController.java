@@ -36,9 +36,10 @@ public class PostController {
     public ResponseEntity<Page<PostDto>> getAllPosts(
             @RequestParam(required = false) UUID categoryId,
             @RequestParam(required = false) UUID tagId,
-            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(required = false) String keyword
     ) {
-        Page<Post> posts = postService.getAllPosts(categoryId, tagId, pageable);
+        Page<Post> posts = postService.getAllPosts(categoryId, tagId, pageable, keyword);
         Page<PostDto> postDtos = posts.map(postMapper::toDto);
         return ResponseEntity.ok(postDtos);
     }

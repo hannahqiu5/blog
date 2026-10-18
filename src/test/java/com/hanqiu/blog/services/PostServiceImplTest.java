@@ -15,6 +15,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -22,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 import java.util.Optional;
@@ -94,24 +96,30 @@ public class PostServiceImplTest {
     @Test
     void getAllPosts() {
         Pageable pageable = PageRequest.of(0, 5);
-        Page<Post> expectedPage = new PageImpl<>(posts, pageable, posts.size());
+        Page<Post> expectedPage =
+                new PageImpl<>(posts, pageable, posts.size());
 
-        when(categoryService.getCategoryById(category.getId()))
-                .thenReturn(category);
-        when(tagService.getTagById(tag.getId()))
-                .thenReturn(tag);
-        when(postRepository.findAllByStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag, pageable))
-                .thenReturn(expectedPage);
+        when(postRepository.findAll(
+                ArgumentMatchers.<Specification<Post>>any(),
+                eq(pageable)
+        )).thenReturn(expectedPage);
 
-        Page<Post> result = postService.getAllPosts(category.getId(), tag.getId(), pageable);
+        Page<Post> result = postService.getAllPosts(
+                category.getId(),
+                tag.getId(),
+                pageable,
+                null
+        );
 
         assertEquals(expectedPage, result);
+        assertEquals(posts, result.getContent());
 
+        verify(postRepository).findAll(
+                ArgumentMatchers.<Specification<Post>>any(),
+                eq(pageable)
+        );
 
-        verify(categoryService).getCategoryById(category.getId());
-        verify(tagService).getTagById(tag.getId());
-        verify(postRepository).findAllByStatusAndCategoryAndTagsContaining(
-                PostStatus.PUBLISHED, category, tag, pageable);
+        verifyNoInteractions(categoryService, tagService);
     }
 
 
@@ -121,52 +129,59 @@ public class PostServiceImplTest {
         Page<Post> expectedPage =
                 new PageImpl<>(posts, pageable, posts.size());
 
-        when(categoryService.getCategoryById(category.getId()))
-                .thenReturn(category);
-
-        when(postRepository.findAllByStatusAndCategory(
-                PostStatus.PUBLISHED,
-                category,
-                pageable
+        when(postRepository.findAll(
+                ArgumentMatchers.<Specification<Post>>any(),
+                eq(pageable)
         )).thenReturn(expectedPage);
 
-        Page<Post> result =
-                postService.getAllPosts(category.getId(), null, pageable);
+        Page<Post> result = postService.getAllPosts(
+                category.getId(),
+                null,
+                pageable,
+                null
+        );
 
         assertEquals(expectedPage, result);
         assertEquals(posts, result.getContent());
 
-        verify(categoryService).getCategoryById(category.getId());
-
-        verify(postRepository).findAllByStatusAndCategory(
-                PostStatus.PUBLISHED,
-                category,
-                pageable
+        verify(postRepository).findAll(
+                ArgumentMatchers.<Specification<Post>>any(),
+                eq(pageable)
         );
 
-        verifyNoInteractions(tagService);
+        verifyNoInteractions(categoryService, tagService);
     }
 
     @Test
     void getAllPosts_withoutFilters_shouldReturnPagedPosts() {
-        // Arrange
         Pageable pageable = PageRequest.of(0, 5);
-        Page<Post> expectedPage = new PageImpl<>(posts, pageable, posts.size());
+        Page<Post> expectedPage =
+                new PageImpl<>(posts, pageable, posts.size());
 
-        when(postRepository.findAllByStatus(PostStatus.PUBLISHED, pageable))
-                .thenReturn(expectedPage);
+        when(postRepository.findAll(
+                ArgumentMatchers.<Specification<Post>>any(),
+                eq(pageable)
+        )).thenReturn(expectedPage);
 
-        // Act
-        Page<Post> result = postService.getAllPosts(null, null, pageable);
+        Page<Post> result = postService.getAllPosts(
+                null,
+                null,
+                pageable,
+                null
+        );
 
-        // Assert
         assertEquals(expectedPage, result);
         assertEquals(2, result.getContent().size());
         assertEquals(0, result.getNumber());
         assertEquals(5, result.getSize());
         assertEquals(2, result.getTotalElements());
 
-        verify(postRepository).findAllByStatus(PostStatus.PUBLISHED, pageable);
+        verify(postRepository).findAll(
+                ArgumentMatchers.<Specification<Post>>any(),
+                eq(pageable)
+        );
+
+        verifyNoInteractions(categoryService, tagService);
     }
 
     @Test

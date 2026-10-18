@@ -11,10 +11,12 @@ import com.hanqiu.blog.repositories.PostRepository;
 import com.hanqiu.blog.services.CategoryService;
 import com.hanqiu.blog.services.PostService;
 import com.hanqiu.blog.services.TagService;
+import com.hanqiu.blog.specifications.PostSpecifications;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,24 +37,28 @@ public class PostServiceImpl implements PostService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<Post> getAllPosts(UUID categoryId, UUID tagId, Pageable pageable) {
-        if (categoryId != null && tagId != null) {
-            Category category = categoryService.getCategoryById(categoryId);
-            Tag tag = tagService.getTagById(tagId);
-            return postRepository.findAllByStatusAndCategoryAndTagsContaining(PostStatus.PUBLISHED, category, tag, pageable);
+    public Page<Post> getAllPosts(UUID categoryId, UUID tagId, Pageable pageable, String keyword) {
 
-        }
-        if (categoryId != null) {
-            Category category = categoryService.getCategoryById(categoryId);
-            return postRepository.findAllByStatusAndCategory(PostStatus.PUBLISHED, category, pageable);
+        Specification<Post> specification = PostSpecifications.isPublished();
+
+        if (keyword != null && !keyword.isBlank()) {
+            specification = specification.and(
+                    PostSpecifications.hasKeyword(keyword)
+            );
         }
 
         if (tagId != null) {
-            Tag tag = tagService.getTagById(tagId);
-            return postRepository.findAllByStatusAndTagsContaining(PostStatus.PUBLISHED, tag, pageable);
+            specification = specification.and(
+                    PostSpecifications.hasTag(tagId)
+            );
         }
 
-        return postRepository.findAllByStatus(PostStatus.PUBLISHED, pageable);
+        if (categoryId != null) {
+            specification = specification.and(
+                    PostSpecifications.hasCategory(categoryId)
+            );
+        }
+        return postRepository.findAll(specification, pageable);
     }
 
     @Override

@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -132,7 +133,8 @@ public class PostControllerTest {
         when(postService.getAllPosts(
                 isNull(),
                 isNull(),
-                any(Pageable.class)
+                any(Pageable.class),
+                isNull()
         )).thenReturn(posts);
 
         when(postMapper.toDto(post))
@@ -154,7 +156,8 @@ public class PostControllerTest {
         verify(postService).getAllPosts(
                 isNull(),
                 isNull(),
-                any(Pageable.class)
+                any(Pageable.class),
+                isNull()
         );
         verify(postMapper).toDto(post);
     }
@@ -300,7 +303,8 @@ public class PostControllerTest {
         when(postService.getAllPosts(
                 isNull(),
                 isNull(),
-                any(Pageable.class)
+                any(Pageable.class),
+                isNull()
         )).thenReturn(posts);
 
         when(postMapper.toDto(post)).thenReturn(postDto);
@@ -319,7 +323,34 @@ public class PostControllerTest {
                 isNull(),
                 isNull(),
                 argThat(p -> p.getPageNumber() == 1
-                        && p.getPageSize() == 2)
+                        && p.getPageSize() == 2),
+                isNull()
+        );
+    }
+
+    @Test
+    void getAllPosts_shouldAcceptKeywordParameter() throws Exception {
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Post> posts = new PageImpl<>(List.of(post), pageable, 1);
+
+        when(postService.getAllPosts(
+                isNull(),
+                isNull(),
+                any(Pageable.class),
+                eq("spring")
+        )).thenReturn(posts);
+
+        when(postMapper.toDto(post)).thenReturn(postDto);
+
+        mockMvc.perform(get("/api/v1/posts")
+                        .param("keyword", "spring"))
+                .andExpect(status().isOk());
+
+        verify(postService).getAllPosts(
+                isNull(),
+                isNull(),
+                any(Pageable.class),
+                eq("spring")
         );
     }
 }
