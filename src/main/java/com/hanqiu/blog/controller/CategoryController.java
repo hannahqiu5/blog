@@ -5,6 +5,10 @@ import com.hanqiu.blog.domain.dtos.CreateCategoryRequest;
 import com.hanqiu.blog.domain.entities.Category;
 import com.hanqiu.blog.mappers.CategoryMapper;
 import com.hanqiu.blog.services.CategoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,6 +34,8 @@ public class CategoryController {
         return ResponseEntity.ok(categories);
     }
 
+    @Operation(summary = "Create a new category")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<CategoryDto> createCategory(
             @Valid @RequestBody CreateCategoryRequest createCategoryRequest) {
@@ -38,6 +44,22 @@ public class CategoryController {
         return new ResponseEntity<>(categoryMapper.toDto(savedCategory), HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Delete a category")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Category deleted successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Insufficient permissions"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {

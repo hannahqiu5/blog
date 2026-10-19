@@ -10,6 +10,10 @@ import com.hanqiu.blog.domain.entities.User;
 import com.hanqiu.blog.mappers.PostMapper;
 import com.hanqiu.blog.services.PostService;
 import com.hanqiu.blog.services.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -51,6 +55,8 @@ public class PostController {
         return ResponseEntity.ok(dto);
     }
 
+    @Operation(summary = "Get draft posts")
+    @SecurityRequirement(name = "bearerAuth")
     @GetMapping("/drafts")
     public ResponseEntity<List<PostDto>> getDrafts(
             @RequestAttribute UUID userId) {
@@ -59,7 +65,8 @@ public class PostController {
         return ResponseEntity.ok(postDtos);
     }
 
-
+    @Operation(summary = "Create a post")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<PostDto> createPost(
             @Valid @RequestBody CreatePostRequestDto createPostRequestDto,
@@ -73,6 +80,8 @@ public class PostController {
         return new ResponseEntity<>(createdPostDto, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Update a post")
+    @SecurityRequirement(name = "bearerAuth")
     @PreAuthorize("@postSecurity.isOwner(#id, authentication)")
     @PutMapping("/{id}")
     public ResponseEntity<PostDto> updatePost(
@@ -85,6 +94,22 @@ public class PostController {
         return ResponseEntity.ok(dto);
     }
 
+    @Operation(summary = "Delete a post")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Post deleted successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Insufficient permissions"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN') or @postSecurity.isOwner(#id, authentication)")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable UUID id) {

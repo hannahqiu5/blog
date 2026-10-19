@@ -5,6 +5,10 @@ import com.hanqiu.blog.domain.dtos.TagDto;
 import com.hanqiu.blog.domain.entities.Tag;
 import com.hanqiu.blog.mappers.TagMapper;
 import com.hanqiu.blog.services.TagService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +33,8 @@ public class TagController {
         return ResponseEntity.ok(tagResponse);
     }
 
+    @Operation(summary = "Create new tags")
+    @SecurityRequirement(name = "bearerAuth")
     @PostMapping
     public ResponseEntity<List<TagDto>> createTags(
             @Valid @RequestBody CreateTagsRequest createTagsRequest) {
@@ -37,6 +43,22 @@ public class TagController {
         return new ResponseEntity<>(createTagRespons, HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Delete a tag")
+    @SecurityRequirement(name = "bearerAuth")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Tag deleted successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Authentication required"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Insufficient permissions"
+            )
+    })
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTag(
