@@ -1,53 +1,33 @@
-# React + TypeScript + Vite
+# Fieldnotes frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React, TypeScript, and Vite frontend for the Spring Boot blog API in the provided backend source. It includes the public journal, searchable and filterable pagination, post detail, registration and login, draft listing, and authenticated post creation/editing/deletion. Tags can be selected or created from the editor.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md)
-  uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast
-  Refresh
+1. Install Node.js 20 or newer.
+2. Start the backend and its PostgreSQL database. The backend defaults to `http://localhost:8080` and PostgreSQL at `localhost:5433`.
+3. Copy `.env.example` to `.env` and adjust `VITE_API_BASE_URL` if needed.
+4. Run `npm install`, then `npm run dev` and open the local URL Vite prints.
+5. For a production build, run `npm run build`; serve the `dist` directory with SPA fallback enabled.
 
-## Expanding the ESLint configuration
+The backend must allow browser requests from the frontend origin (CORS). The supplied backend source did not include a CORS configuration. Add the Vite origin, normally `http://localhost:5173`, to the backend's allowed origins before using the browser app.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Authentication and Google
 
-- Configure the top-level `parserOptions` property like this:
+Email/password login calls `POST /api/v1/auth/login` and stores the returned JWT in browser local storage. Authenticated requests send `Authorization: Bearer <jwt>`. Registration uses `POST /api/v1/auth/register`; after registering, sign in normally.
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+To enable Google sign-in, configure `VITE_GOOGLE_OAUTH_URL` to the backend's OAuth entry route (default `/oauth2/authorization/google`). The supplied success handler writes the JWT as a raw response body after Google login; it does not redirect back to the frontend or issue a browser-readable callback URL. For a seamless SPA flow, update the backend success handler to redirect to a configured frontend callback with a short-lived, safely exchanged credential. The current frontend shows the Google link only when that URL is configured.
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or
-  `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+The backend returns no profile/current-user endpoint, and its JWT generator currently places no role claims in the token. Post DTOs expose author name but not author email. The frontend therefore shows editing/deletion actions to signed-in users and relies on the backend's owner/admin checks for the final authorization decision; a user without permission will receive the API's 403 response.
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+## API usage reflected in the UI
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+- `GET /api/v1/posts`: Spring `Page<PostDto>`; defaults to 5 items and newest first. The frontend requests 6 per page, supports `page`, `size`, `sort`, optional `keyword`, `categoryId`, and `tagId`. Keyword searches title and content; public results are published posts only.
+- `GET /api/v1/posts/{id}`, `GET /api/v1/posts/drafts`.
+- `POST /api/v1/auth/login`, `POST /api/v1/auth/register`.
+- `POST /api/v1/posts`, `PUT /api/v1/posts/{id}`, `DELETE /api/v1/posts/{id}`.
+- `GET /api/v1/categories`, `GET /api/v1/tags`, `POST /api/v1/tags`.
+
+Create/update bodies use `title`, `content`, `categoryId`, `tagIds`, and `status` (`DRAFT` or `PUBLISHED`). Update also includes `id`. Post DTOs include nested author/category/tags, reading time, timestamps, and status. The backend has no category-creation control beyond `POST /api/v1/categories`; categories need to exist before writing. This app focuses category selection and tag creation.
+
+No credentials or backend secrets are included. Google credentials and JWT signing secret must be provided to the backend via its environment/configuration.

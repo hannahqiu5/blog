@@ -21,6 +21,7 @@ import OrderedList from '@tiptap/extension-ordered-list';
 import ListItem from '@tiptap/extension-list-item';
 import {Bold, ChevronDown, Italic, List, ListOrdered, Redo, Undo, X} from 'lucide-react';
 import {Category, Post, PostStatus, Tag} from '../services/apiService';
+import type { Level } from '@tiptap/extension-heading';
 
 interface PostFormProps {
     initialPost?: Post | null;
@@ -135,8 +136,7 @@ const PostForm: React.FC<PostFormProps> = ({
     };
 
     const handleHeadingSelect = (level: number) => {
-        editor?.chain().focus().toggleHeading({level}).run();
-    };
+        editor?.chain().focus().toggleHeading({ level: level as Level }).run();    };
 
     const suggestedTags = availableTags
         .filter(tag => !selectedTags.includes(tag))
