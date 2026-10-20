@@ -1,12 +1,14 @@
 package com.hanqiu.blog.security;
 
 import com.hanqiu.blog.domain.entities.User;
+import com.hanqiu.blog.domain.enums.Role;
 import com.hanqiu.blog.repositories.UserRepository;
 import com.hanqiu.blog.services.AuthenticationService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,6 +28,9 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     private final AuthenticationService authenticationService;
     private final UserDetailsService userDetailsService;
 
+    @Value("${app.oauth2.success-redirect-url:http://localhost/oauth2/callback}")
+    private String successRedirectUrl;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
                                         HttpServletResponse response,
@@ -35,21 +40,37 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
         String email = oauthToken.getPrincipal().getAttribute("email");
 
+        if (email == null || email.isBlank()) {
+            response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Google account did not provide an email address"
+            );
+            return;
+        }
+
         Optional<User> user = userRepository.findByEmail(email);
 
         if (user.isEmpty()) {
+            String name = oauthToken.getPrincipal().getAttribute("name");
+
+            if (name == null || name.isBlank()) {
+                name = email.substring(0, email.indexOf('@'));
+            }
+
             User newUser = User.builder()
                     .email(email)
                     .password(null)
-                    .name(oauthToken.getPrincipal().getName())
-                    .createdAt(LocalDateTime.now()).build();
-            userRepository.save(newUser);
+                    .name(name)
+                    .role(Role.USER)
+                    .createdAt(LocalDateTime.now())
+                    .build();
 
+            userRepository.save(newUser);
         }
+
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         String jwt = authenticationService.generateToken(userDetails);
 
-        response.setContentType("application/json");
-        response.getWriter().write(jwt);
+        response.sendRedirect(successRedirectUrl + "#token=" + jwt);
     }
 }

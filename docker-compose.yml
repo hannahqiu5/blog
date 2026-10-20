@@ -5,10 +5,16 @@ services:
       - "5433:5432"
     restart: always
     environment:
-      POSTGRES_PASSWORD: changemeinprod!
-
+      POSTGRES_DB: blog
+      POSTGRES_USER: bloguser
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+    volumes:
+      - blog_data:/var/lib/postgresql/data
   adminer:
     image: adminer:latest
     restart: always
     ports:
       - "8888:8080"
+
+volumes:
+  blog_data:

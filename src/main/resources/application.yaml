@@ -3,9 +3,9 @@ spring:
     name: blog
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/postgres
-    username: postgres
-    password: changemeinprod!
+    url: jdbc:postgresql://localhost:5433/blog
+    username: bloguser
+    password: ${POSTGRES_PASSWORD}
 
   jpa:
     hibernate:
@@ -29,5 +29,9 @@ spring:
               - email
 
 jwt:
-  secret: your-256-bit-secret-key-here-make-it-at-least-32-bytes-long
+  secret: ${JWT_SECRET}
+
+app:
+  oauth2:
+    success-redirect-url: ${OAUTH2_SUCCESS_REDIRECT_URL:http://localhost/oauth2/callback}
 

@@ -6,6 +6,7 @@ import com.hanqiu.blog.domain.dtos.RegisterRequest;
 import com.hanqiu.blog.domain.entities.User;
 import com.hanqiu.blog.domain.enums.Role;
 import com.hanqiu.blog.repositories.UserRepository;
+import com.hanqiu.blog.security.BlogUserDetails;
 import com.hanqiu.blog.services.AuthenticationService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -49,6 +50,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public String generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
+        if (userDetails instanceof BlogUserDetails blogUserDetails) {
+            claims.put("userId", blogUserDetails.getId());
+        }
+        claims.put("roles", userDetails.getAuthorities().stream()
+                .map(authority -> authority.getAuthority())
+                .toList());
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(userDetails.getUsername())

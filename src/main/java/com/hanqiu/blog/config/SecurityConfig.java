@@ -16,14 +16,31 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Locale;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+    private static final Logger logger = LoggerFactory.getLogger(SecurityConfig.class);
+    private static final Set<String> SAFE_PROVIDER_ERROR_CODES = Set.of(
+            "invalid_client", "invalid_grant", "unauthorized_client", "invalid_request",
+            "unsupported_grant_type", "invalid_scope", "access_denied"
+    );
+    private static final Pattern PROVIDER_ERROR_CODE_PATTERN = Pattern.compile(
+            "(?i)\\b(invalid_client|invalid_grant|unauthorized_client|invalid_request|unsupported_grant_type|invalid_scope|access_denied)\\b"
+    );
+
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(AuthenticationService authenticationService) {
         return new JwtAuthenticationFilter(authenticationService);
@@ -72,7 +89,19 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 ).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
-                        .successHandler(oAuth2AuthenticationSuccessHandler));
+                        .successHandler(oAuth2AuthenticationSuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            String errorCode = exception instanceof OAuth2AuthenticationException oauthException
+                                    ? oauthException.getError().getErrorCode()
+                                    : exception.getClass().getSimpleName();
+                            String providerErrorCode = findProviderErrorCode(exception);
+                            String causeType = exception.getCause() == null
+                                    ? "none"
+                                    : exception.getCause().getClass().getSimpleName();
+                            logger.warn("OAuth2 login failed; errorCode={}, providerErrorCode={}, causeType={}",
+                                    errorCode, providerErrorCode, causeType);
+                            response.sendRedirect("/login?error");
+                        }));
         return http.build();
     }
 
@@ -84,6 +113,25 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    private static String findProviderErrorCode(Throwable failure) {
+        for (Throwable cause = failure; cause != null; cause = cause.getCause()) {
+            if (cause instanceof OAuth2AuthenticationException oauthException) {
+                String code = oauthException.getError().getErrorCode();
+                if (SAFE_PROVIDER_ERROR_CODES.contains(code)) {
+                    return code;
+                }
+            }
+            String message = cause.getMessage();
+            if (message != null) {
+                Matcher matcher = PROVIDER_ERROR_CODE_PATTERN.matcher(message);
+                if (matcher.find()) {
+                    return matcher.group(1).toLowerCase(Locale.ROOT);
+                }
+            }
+        }
+        return "unavailable";
     }
 
 }

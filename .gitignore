@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Local database backups
+blog-backup.dump
+
+# TypeScript build cache
+frontend/tsconfig.tsbuildinfo
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!.env.prod.example
