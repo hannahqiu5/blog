@@ -15,7 +15,7 @@ jobs:
       - name: set up java 17
         run: actions/setup-java@v4
         with:
-          distribution: tumurin
+          distribution: temurin
           java-version: 17
           cache: maven
 
