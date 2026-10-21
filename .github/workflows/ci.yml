@@ -1,12 +1,23 @@
-name: first ci
+name: Blog CI
 
 on:
   push:
+  pull_request:
 
 jobs:
-  test:
+  backend-test:
     runs-on: ubuntu-latest
 
     steps:
-      - name: say hello
-        run: echo "hello github actions"
+      - name: checkout code
+        run: actions/checkout@v4
+
+      - name: set up java 17
+        run: actions/setup-java@v4
+        with:
+          distribution: tumurin
+          java-version: 17
+          cache: maven
+
+      - name: run backend tests
+        run: ./mvnw -B test
