@@ -16,7 +16,7 @@ jobs:
         run: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: '17'
           cache: maven
 
       - name: run backend tests
